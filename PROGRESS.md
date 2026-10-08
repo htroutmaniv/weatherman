@@ -1,10 +1,10 @@
 # Weatherman — progress
 
-Last updated: **2026-10-07** (Wed — paused mid C2)
+Last updated: **2026-10-08** (Thu — current conditions working)
 
 ## Current focus
 
-**C2 — Weather by US ZIP (live APIs, no mock)**
+**C8 — Daily forecast cards** (next session). C2 current conditions are in.
 
 ## Chunk status
 
@@ -12,7 +12,8 @@ Last updated: **2026-10-07** (Wed — paused mid C2)
 |----|--------|--------|-------|
 | C0 | Repo hygiene | done | Vite React-TS scaffold; GitHub `htroutmaniv/weatherman`; env example + README |
 | C1 | Shell layout | done | Flex shell; body/#root margin reset |
-| C2 | Weather by ZIP (live) | **next** | Zippopotam + Open-Meteo (no key) |
+| C2 | Weather by ZIP (live) | done | Zippopotam → lat/lon; Open-Meteo current in °F / mph; `WeatherCard` |
+| C8 | Daily forecast cards | **next** | One card per day; include time so hourly can reuse the card later |
 | C3 | Abort + ZIP validation polish | pending | |
 | C4 | Abort + race safety | pending | |
 | C5 | Normalize + display | pending | |
@@ -28,12 +29,17 @@ Last updated: **2026-10-07** (Wed — paused mid C2)
 - **Next:** C1 shell layout
 - C1 done (shell + margin reset). **Next:** C2 weather skeleton
 
+### 2026-10-08 Thu
+- C2 done: ZIP input, Zippopotam place, Open-Meteo current conditions, weather-code labels, `WeatherCard` component, types in `Types.ts`
+- Layout fix: drop the 75% padding; `marginLeft: auto` keeps the zip controls on screen
+- **Next session:** daily forecast — Open-Meteo `daily=...` plus `timezone=auto`, one `WeatherCard` per day. Design the card so a time label works for daily now and hourly later.
+
 ## Blockers
 
 - None
 
 ## Decisions
 
-- v1 weather source: Open-Meteo (no key)
+- v1: US ZIP → Zippopotam.us → Open-Meteo. Temperature °F, wind mph. `timezone=auto` when adding daily/hourly so day labels are local.
 - Agent does not write project app code unless Harold asks
 - One feed in v1; 3D explicitly post-v1
