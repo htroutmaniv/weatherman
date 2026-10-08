@@ -5,7 +5,10 @@ export type Location = {
   lon:string
 }
 export type Weather = {
-  temperature:number,
+  temperature?:number,
+  highTemp?:number,
+  lowTemp?:number,
   code:number,
-  windSpeed:number
+  windSpeed:number,
+  time:string
 }
