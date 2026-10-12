@@ -67,7 +67,7 @@ function App() {
         
       }catch (err:any){    
         if(err.name === 'AbortError') return;    
-        setRequestError('Zip invalid');
+        setRequestError('Weather data could not be retrieved for this location');
         console.error(err.message);
         setLocation(undefined);
         setCurrentWeather(undefined);
@@ -80,7 +80,7 @@ function App() {
 
 
   
-  const requestWeatherData = async()=>{
+  const requestLocationData = async()=>{
     setRequestError(undefined);
     const uri:string = `https://api.zippopotam.us/us/${zipcode}`;
     if(abortRef.current) abortRef.current.abort();
@@ -97,7 +97,7 @@ function App() {
       setLocation(locationData);      
     }catch (err:any){
       if(err.name === 'AbortError') return;
-      setRequestError('No weather data for specified location.');
+      setRequestError('Bad zipcode');
       console.error(err.message);
       setLocation(undefined);
       setCurrentWeather(undefined);
@@ -116,7 +116,7 @@ function App() {
           <div style={{marginLeft:'auto',display:"flex", alignItems:'center', gap:5}}>
             <p>Zipcode</p>  
             <input value={zipcode} onChange={(e)=>setZipcode(e.target.value.replace(/\D/g,'').slice(0,5))} placeholder="enter zipcode" type="text" style={{height:"25%", position:"relative"}}></input>
-            <button onClick={()=>requestWeatherData()} style={{width:'150px',height:"35%", position:"relative"}} disabled={searchDisabled}>update</button>
+            <button onClick={()=>requestLocationData()} style={{width:'150px',height:"35%", position:"relative"}} disabled={searchDisabled}>update</button>
           </div>
         </div> 
         {requestError&& <h1 style={{display:"flex",flexDirection:"column",alignItems:'center',color:"rgb(255, 0, 0)"}}>Error Retrieving data: {requestError}</h1>}
