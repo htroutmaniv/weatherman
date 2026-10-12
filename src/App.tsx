@@ -1,4 +1,4 @@
-import { useState,useEffect } from 'react'
+import { useState,useEffect,useRef } from 'react'
 import type {Location,Weather} from './Types.ts'
 import {WeatherCard} from '../Components/weatherCard'
 
@@ -9,8 +9,10 @@ function App() {
   const [searchDisabled,setSearchDisabled] = useState<boolean>(true);
   const [location,setLocation] = useState<Location>();
   const [currentWeather,setCurrentWeather] = useState<Weather>();
-  const [dailyWeather,setDailyWeather] = useState<Weather[]>([]);
+  const [dailyWeather,setDailyWeather] = useState<Weather[]|undefined>([]);
   const [lastUpdated,setLastUpdated] = useState<string>();
+  const [requestError,setRequestError] = useState<string>();
+  const abortRef = useRef<AbortController|null>(null);
 
   //updates zipcode state
   useEffect(()=>{
@@ -25,10 +27,11 @@ function App() {
   //fetches current weather conditions as location changes
   useEffect(()=>{
     if(!location) return;
+    const controller:AbortController = new AbortController();
     const uri:string = `https://api.open-meteo.com/v1/forecast?latitude=${location.lat}&longitude=${location.lon}&current=temperature_2m,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,weather_code,wind_speed_10m_max&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=auto`;
     const retrieveForecast = async()=>{
       try{
-        const response = await fetch(uri);
+        const response = await fetch(uri,{signal:controller.signal});
         if(!response.ok){
           throw new Error(response as any);
         }
@@ -62,19 +65,29 @@ function App() {
         });
         setLastUpdated(time);
         
-      }catch (err:any){
+      }catch (err:any){    
+        if(err.name === 'AbortError') return;    
+        setRequestError('Zip invalid');
         console.error(err.message);
+        setLocation(undefined);
+        setCurrentWeather(undefined);
+        setDailyWeather([]);
       }
     }
     retrieveForecast();
+    return ()=>controller.abort();
   },[location]);
 
 
   
   const requestWeatherData = async()=>{
+    setRequestError(undefined);
     const uri:string = `https://api.zippopotam.us/us/${zipcode}`;
+    if(abortRef.current) abortRef.current.abort();
+    const controller:AbortController = new AbortController();
+    abortRef.current = controller;
     try{
-      const response:any = await fetch(uri);
+      const response:any = await fetch(uri,{signal:controller.signal});
       if(!response.ok){
         throw new Error(response);
       }
@@ -83,7 +96,12 @@ function App() {
       const locationData:Location = {state:place.state,county:place[`place name`],lat:place.latitude,lon:place.longitude}
       setLocation(locationData);      
     }catch (err:any){
+      if(err.name === 'AbortError') return;
+      setRequestError('No weather data for specified location.');
       console.error(err.message);
+      setLocation(undefined);
+      setCurrentWeather(undefined);
+      setDailyWeather([]);      
     }    
   }
   
@@ -101,6 +119,7 @@ function App() {
             <button onClick={()=>requestWeatherData()} style={{width:'150px',height:"35%", position:"relative"}} disabled={searchDisabled}>update</button>
           </div>
         </div> 
+        {requestError&& <h1 style={{display:"flex",flexDirection:"column",alignItems:'center',color:"rgb(255, 0, 0)"}}>Error Retrieving data: {requestError}</h1>}
         <div style={{display:"flex",flexDirection:"column",width:"100%",alignItems:'center'}}>
           {location && <h2 >Current conditions in {location.county}, {location.state} </h2>}
           {currentWeather && <WeatherCard weather={currentWeather}></WeatherCard>}
@@ -108,7 +127,7 @@ function App() {
           <div style={{display:"flex",flexDirection:"column",width:"100%",alignItems:'center'}}>
               {location && <p >Weekly Forecast</p>}
               <div style={{display:"flex",flexDirection:"row",width:"100%",justifyContent:"space-evenly"}}>
-              {dailyWeather.length>0 &&
+              {dailyWeather && dailyWeather.length>0 &&
                 dailyWeather.map((day)=>{
                   return <WeatherCard key={day.time} weather={day}/>
                 })

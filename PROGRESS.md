@@ -1,10 +1,10 @@
 # Weatherman — progress
 
-Last updated: **2026-10-08** (Thu — daily forecast cards working)
+Last updated: **2026-10-12** (Mon — C3 done)
 
 ## Current focus
 
-**C3 — Abort + invalid ZIP polish** when you next pick up Weatherman. Current conditions and a 7-day row are in.
+**C7 — Deploy** when you next pick up Weatherman, or hourly forecast if you would rather extend the cards first. C4/C5/C6 are largely covered by the current app.
 
 ## Chunk status
 
@@ -14,11 +14,11 @@ Last updated: **2026-10-08** (Thu — daily forecast cards working)
 | C1 | Shell layout | done | Flex shell; body/#root margin reset |
 | C2 | Weather by ZIP (live) | done | Zippopotam → lat/lon; Open-Meteo current in °F / mph; `WeatherCard` |
 | C8 | Daily forecast cards | done | Open-Meteo `daily` + `timezone=auto`; one `WeatherCard` per day; optional high/low; weekday from `time` |
-| C3 | Abort + ZIP validation polish | **next** | AbortController on a new ZIP; clear error for a bad ZIP |
+| C3 | Abort + ZIP validation polish | done | ZIP abort + forecast effect abort. `AbortError` ignored. Bad ZIP clears cards and shows a message. |
 | C4 | Abort + race safety | pending | |
 | C5 | Normalize + display | pending | |
 | C6 | Location input | pending | |
-| C7 | Deploy | pending | |
+| C7 | Deploy | **next** | Production build + public URL in the README |
 
 ## Session log
 
@@ -34,6 +34,9 @@ Last updated: **2026-10-08** (Thu — daily forecast cards working)
 - Layout fix: drop the 75% padding; `marginLeft: auto` keeps the zip controls on screen
 - **Next session:** daily forecast — Open-Meteo `daily=...` plus `timezone=auto`, one `WeatherCard` per day. Design the card so a time label works for daily now and hourly later.
 - C8 done same day: 7-day row reuses `WeatherCard`, optional high/low, weekday label from `daily.time`.
+
+### 2026-10-12 Mon
+- C3 done: Zippopotam abort via ref, Open-Meteo abort in the location effect, `AbortError` ignored, bad ZIP clears cards.
 
 ## Blockers
 
