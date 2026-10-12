@@ -37,6 +37,7 @@ Last updated: **2026-10-12** (Mon — C3 done)
 
 ### 2026-10-12 Mon
 - C3 done: Zippopotam abort via ref, Open-Meteo abort in the location effect, `AbortError` ignored, bad ZIP clears cards.
+- Refresh interval: effect depends on `location` so the timer closes over the current city. Empty deps froze the first render's `location`.
 
 ## Blockers
 

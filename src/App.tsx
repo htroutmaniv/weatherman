@@ -28,8 +28,51 @@ function App() {
   useEffect(()=>{
     if(!location) return;
     const controller:AbortController = new AbortController();
-    const uri:string = `https://api.open-meteo.com/v1/forecast?latitude=${location.lat}&longitude=${location.lon}&current=temperature_2m,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,weather_code,wind_speed_10m_max&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=auto`;
-    const retrieveForecast = async()=>{
+    const uri:string = `https://api.open-meteo.com/v1/forecast?latitude=${location.lat}&longitude=${location.lon}&current=temperature_2m,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,weather_code,wind_speed_10m_max&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=auto`;    
+    retrieveForecast(uri,controller);
+    return ()=>controller.abort();
+  },[location]);
+
+  //updates weather for current location every 5 minutes
+  useEffect(()=>{    
+ 
+      const requestWeatherInterval = ()=>{        
+        if(!location) return;
+        const controller:AbortController = new AbortController();
+        const uri:string = `https://api.open-meteo.com/v1/forecast?latitude=${location.lat}&longitude=${location.lon}&current=temperature_2m,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,weather_code,wind_speed_10m_max&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=auto`;    
+        retrieveForecast(uri,controller);
+      }    
+
+      const cancelInterval = setInterval(requestWeatherInterval,1000*60*5);
+      return ()=>clearInterval(cancelInterval);
+  },[location]);
+  
+  const requestLocationData = async()=>{
+    setRequestError(undefined);
+    const uri:string = `https://api.zippopotam.us/us/${zipcode}`;
+    if(abortRef.current) abortRef.current.abort();
+    const controller:AbortController = new AbortController();
+    abortRef.current = controller;
+    try{
+      const response:any = await fetch(uri,{signal:controller.signal});
+      if(!response.ok){
+        throw new Error(response);
+      }
+      const result = await response.json();      
+      const place = result.places[0];
+      const locationData:Location = {state:place.state,county:place[`place name`],lat:place.latitude,lon:place.longitude}
+      setLocation(locationData);      
+    }catch (err:any){
+      if(err.name === 'AbortError') return;
+      setRequestError('Bad zipcode');
+      console.error(err.message);
+      setLocation(undefined);
+      setCurrentWeather(undefined);
+      setDailyWeather([]);      
+    }    
+  }
+
+  const retrieveForecast = async(uri:string,controller:AbortController)=>{
       try{
         const response = await fetch(uri,{signal:controller.signal});
         if(!response.ok){
@@ -64,6 +107,7 @@ function App() {
           minute: '2-digit',
         });
         setLastUpdated(time);
+        console.log(`${time}`);
         
       }catch (err:any){    
         if(err.name === 'AbortError') return;    
@@ -74,36 +118,6 @@ function App() {
         setDailyWeather([]);
       }
     }
-    retrieveForecast();
-    return ()=>controller.abort();
-  },[location]);
-
-
-  
-  const requestLocationData = async()=>{
-    setRequestError(undefined);
-    const uri:string = `https://api.zippopotam.us/us/${zipcode}`;
-    if(abortRef.current) abortRef.current.abort();
-    const controller:AbortController = new AbortController();
-    abortRef.current = controller;
-    try{
-      const response:any = await fetch(uri,{signal:controller.signal});
-      if(!response.ok){
-        throw new Error(response);
-      }
-      const result = await response.json();      
-      const place = result.places[0];
-      const locationData:Location = {state:place.state,county:place[`place name`],lat:place.latitude,lon:place.longitude}
-      setLocation(locationData);      
-    }catch (err:any){
-      if(err.name === 'AbortError') return;
-      setRequestError('Bad zipcode');
-      console.error(err.message);
-      setLocation(undefined);
-      setCurrentWeather(undefined);
-      setDailyWeather([]);      
-    }    
-  }
   
 
 
