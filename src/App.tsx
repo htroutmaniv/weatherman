@@ -42,7 +42,7 @@ function App() {
       const requestWeatherInterval = ()=>{        
         if(!location) return;
         const controller:AbortController = new AbortController();
-        const uri:string = `https://api.open-meteo.com/v1/forecast?latitude=${location.lat}&longitude=${location.lon}&current=temperature_2m,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,weather_code,wind_speed_10m_max&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=auto`;    
+        const uri:string = `https://api.open-meteo.com/v1/forecast?latitude=${location.lat}&longitude=${location.lon}&current=temperature_2m,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,weather_code,wind_speed_10m_max,sunrise,sunset&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=auto&hourly=temperature_2m,weather_code,wind_speed_10m&forecast_hours=12`;     
         retrieveForecast(uri,controller);
       }    
 
@@ -142,7 +142,7 @@ function App() {
       }catch (err:any){    
         if(err.name === 'AbortError') return;    
         setRequestError('Weather data could not be retrieved for this location');
-        console.error(err.message);
+        console.error(err);
         setLocation(undefined);
         setCurrentWeather(undefined);
         setDailyWeather([]);
