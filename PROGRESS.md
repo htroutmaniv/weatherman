@@ -1,10 +1,10 @@
 # Weatherman — progress
 
-Last updated: **2026-10-12** (Mon — C3 done)
+Last updated: **2026-10-14** (Wed — hourly, sun cycle, refresh)
 
 ## Current focus
 
-**C7 — Deploy** when you next pick up Weatherman, or hourly forecast if you would rather extend the cards first. C4/C5/C6 are largely covered by the current app.
+**C10 — News ticker** next. Hourly forecast, sunrise/sunset, night icons, and a manual refresh are in. Deploy after the ticker.
 
 ## Chunk status
 
@@ -18,7 +18,9 @@ Last updated: **2026-10-12** (Mon — C3 done)
 | C4 | Abort + race safety | pending | |
 | C5 | Normalize + display | pending | |
 | C6 | Location input | pending | |
-| C7 | Deploy | **next** | Production build + public URL in the README |
+| C9 | Hourly forecast | done | `forecast_hours=12`, hour label, sunrise/sunset, night icons, refresh button calls the same forecast fetch |
+| C10 | News ticker | **next** | Headlines for the city; each item is a link that opens the article in a new tab |
+| C7 | Deploy | pending | After hourly + ticker. Production build + public URL in the README |
 
 ## Session log
 
@@ -38,6 +40,9 @@ Last updated: **2026-10-12** (Mon — C3 done)
 ### 2026-10-12 Mon
 - C3 done: Zippopotam abort via ref, Open-Meteo abort in the location effect, `AbortError` ignored, bad ZIP clears cards.
 - Refresh interval: effect depends on `location` so the timer closes over the current city. Empty deps froze the first render's `location`.
+
+### 2026-10-14 Wed
+- C9 done: hourly row, sunrise/sunset on the daily fields, night icons between 9pm and 9am, refresh button via an `onRefresh` prop. `HourlyWeather` and `WeeklyWeather` are their own components. `WeeklyWeather` must not reference `location` unless it is passed in.
 
 ## Blockers
 

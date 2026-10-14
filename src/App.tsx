@@ -1,6 +1,8 @@
 import { useState,useEffect,useRef } from 'react'
 import type {Location,Weather} from './Types.ts'
 import {WeatherCard} from '../Components/weatherCard'
+import {WeeklyWeather} from '../Components/WeeklyWeather'
+import {HourlyWeather} from '../Components/HourlyWeather'
 
 
 
@@ -10,8 +12,9 @@ function App() {
   const [location,setLocation] = useState<Location>();
   const [currentWeather,setCurrentWeather] = useState<Weather>();
   const [dailyWeather,setDailyWeather] = useState<Weather[]|undefined>([]);
+  const [hourlyWeather,setHourlyWeather] = useState<Weather[]|undefined>([]);
   const [lastUpdated,setLastUpdated] = useState<string>();
-  const [requestError,setRequestError] = useState<string>();
+  const [requestError,setRequestError] = useState<string>();  
   const abortRef = useRef<AbortController|null>(null);
 
   //updates zipcode state
@@ -28,7 +31,7 @@ function App() {
   useEffect(()=>{
     if(!location) return;
     const controller:AbortController = new AbortController();
-    const uri:string = `https://api.open-meteo.com/v1/forecast?latitude=${location.lat}&longitude=${location.lon}&current=temperature_2m,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,weather_code,wind_speed_10m_max&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=auto`;    
+    const uri:string = `https://api.open-meteo.com/v1/forecast?latitude=${location.lat}&longitude=${location.lon}&current=temperature_2m,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,weather_code,wind_speed_10m_max,sunrise,sunset&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=auto&hourly=temperature_2m,weather_code,wind_speed_10m&forecast_hours=12`;    
     retrieveForecast(uri,controller);
     return ()=>controller.abort();
   },[location]);
@@ -80,13 +83,20 @@ function App() {
         }
         const result = await response.json();
         console.log(result);
+        const sunrise = result.daily.sunrise[0];
+        const sunset = result.daily.sunset[0];
+        //current weather
         const weather:Weather = {
           temperature:result.current.temperature_2m,
           code:result.current.weather_code,
           windSpeed:result.current.wind_speed_10m,
-          time:result.current.time
+          time:result.current.time,
+          timeType:"current",
+          sunrise:sunrise,
+          sunset:sunset
         }
         setCurrentWeather(weather);
+        //daily weather
         const daily:Weather[] = [];
         for(let i = 0; i<7;i++){
           const weather:Weather = {
@@ -95,10 +105,30 @@ function App() {
             code:result.daily.weather_code[i],
             windSpeed:result.daily.wind_speed_10m_max[i],
             time:result.daily.time[i],
+            timeType:"daily",
+            sunrise:result.daily.sunrise[i],
+            sunset:result.daily.sunset[i],
           }
           daily.push(weather);
-        }
+        }        
         setDailyWeather(daily);
+        //hourly weather
+        const hourData=result.hourly;
+        const hourly:Weather[] = [];
+        for(let i = 0; i<hourData.time.length;i++){
+          const weather:Weather = {
+            temperature:hourData.temperature_2m[i],
+            code:hourData.weather_code[i],
+            windSpeed:hourData.wind_speed_10m[i],
+            time:hourData.time[i],
+            timeType:"hourly",
+            sunrise:sunrise,
+            sunset:sunset,
+          }
+          hourly.push(weather);
+        }
+        setHourlyWeather(hourly);
+        //set updated time
         const time = new Date(Date.now()).toLocaleString(undefined, {
           weekday: 'short',
           month: 'short',
@@ -138,17 +168,14 @@ function App() {
           {location && <h2 >Current conditions in {location.county}, {location.state} </h2>}
           {currentWeather && <WeatherCard weather={currentWeather}></WeatherCard>}
         </div> 
-          <div style={{display:"flex",flexDirection:"column",width:"100%",alignItems:'center'}}>
-              {location && <p >Weekly Forecast</p>}
-              <div style={{display:"flex",flexDirection:"row",width:"100%",justifyContent:"space-evenly"}}>
-              {dailyWeather && dailyWeather.length>0 &&
-                dailyWeather.map((day)=>{
-                  return <WeatherCard key={day.time} weather={day}/>
-                })
-              }
-            </div>          
-        </div>
-        {lastUpdated&& <p>Last Updated: {lastUpdated}</p>}     
+        {location && <HourlyWeather hourlyWeather={hourlyWeather}/>}
+        {location && <WeeklyWeather dailyWeather={dailyWeather}/>}
+        {lastUpdated && <>
+          <div style={{display:"flex",flexDirection:"row",alignItems:'center'}}>
+          <p>Last Updated: {lastUpdated}</p>
+          <button onClick={()=>requestLocationData()} style={{height:"50%"}}>↻</button>
+          </div>
+        </>} 
       </main>      
     </div>    
   )

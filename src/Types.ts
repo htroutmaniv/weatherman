@@ -10,5 +10,8 @@ export type Weather = {
   lowTemp?:number,
   code:number,
   windSpeed:number,
-  time:string
+  time:string,
+  timeType:string
+  sunrise:string,
+  sunset:string
 }
