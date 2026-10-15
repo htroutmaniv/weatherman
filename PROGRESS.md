@@ -1,10 +1,10 @@
 # Weatherman — progress
 
-Last updated: **2026-10-14** (Wed — hourly, sun cycle, refresh)
+Last updated: **2026-10-15** (Thu — browser location seed)
 
 ## Current focus
 
-**C10 — News ticker** next. Hourly forecast, sunrise/sunset, night icons, and a manual refresh are in. Deploy after the ticker.
+**C11 — Browser location** in progress. On load, ask for geolocation and seed the ZIP field. **C10** news ticker after that. Deploy after the ticker.
 
 ## Chunk status
 
@@ -19,8 +19,9 @@ Last updated: **2026-10-14** (Wed — hourly, sun cycle, refresh)
 | C5 | Normalize + display | pending | |
 | C6 | Location input | pending | |
 | C9 | Hourly forecast | done | `forecast_hours=12`, hour label, sunrise/sunset, night icons, refresh button calls the same forecast fetch |
-| C10 | News ticker | **next** | Headlines for the city; each item is a link that opens the article in a new tab |
-| C7 | Deploy | pending | After hourly + ticker. Production build + public URL in the README |
+| C11 | Browser location | **in progress** | `getCurrentPosition` on mount. Reverse lat/lon to a US ZIP and `setZipcode`. Denied permission leaves the field empty. |
+| C10 | News ticker | pending | Headlines for the city; each item is a link that opens the article in a new tab |
+| C7 | Deploy | pending | After the ticker. Production build + public URL in the README |
 
 ## Session log
 

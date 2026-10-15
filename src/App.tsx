@@ -17,6 +17,11 @@ function App() {
   const [requestError,setRequestError] = useState<string>();  
   const abortRef = useRef<AbortController|null>(null);
 
+  useEffect(()=>{
+    navigator.geolocation.getCurrentPosition(reverseZipLookup,()=>console.error(`reverse lookup of position failed`));
+  },[])
+
+
   //updates zipcode state
   useEffect(()=>{
     if(zipcode.length===5){
@@ -24,32 +29,51 @@ function App() {
     }else{
       setSearchDisabled(true);
     }   
-
   },[zipcode]); 
 
   //fetches current weather conditions as location changes
   useEffect(()=>{
-    if(!location) return;
-    const controller:AbortController = new AbortController();
-    const uri:string = `https://api.open-meteo.com/v1/forecast?latitude=${location.lat}&longitude=${location.lon}&current=temperature_2m,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,weather_code,wind_speed_10m_max,sunrise,sunset&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=auto&hourly=temperature_2m,weather_code,wind_speed_10m&forecast_hours=12`;    
-    retrieveForecast(uri,controller);
-    return ()=>controller.abort();
+    if(!location) return;    
+    retrieveForecast();
+    
   },[location]);
 
   //updates weather for current location every 5 minutes
-  useEffect(()=>{    
- 
+  useEffect(()=>{   
       const requestWeatherInterval = ()=>{        
-        if(!location) return;
-        const controller:AbortController = new AbortController();
-        const uri:string = `https://api.open-meteo.com/v1/forecast?latitude=${location.lat}&longitude=${location.lon}&current=temperature_2m,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,weather_code,wind_speed_10m_max,sunrise,sunset&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=auto&hourly=temperature_2m,weather_code,wind_speed_10m&forecast_hours=12`;     
-        retrieveForecast(uri,controller);
-      }    
+        if(!location) return;                  
+        retrieveForecast();
+      }   
 
       const cancelInterval = setInterval(requestWeatherInterval,1000*60*5);
       return ()=>clearInterval(cancelInterval);
   },[location]);
   
+
+  const reverseZipLookup = async(geoLocation:GeolocationPosition)=>{
+    const lat = geoLocation.coords.latitude;
+    const long = geoLocation.coords.longitude;
+    console.log(`lat:${lat}, long:${long}`);
+
+    const uri:string = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${long}&localityLanguage=en`;
+
+    try{
+      const response:any = await fetch(uri);
+      if(!response.ok){
+        throw new Error(response);
+      }
+      const result = await response.json();
+      console.log(result);
+      //setZipcode(result.postcode);
+      const locationData:Location = {state:result.principalSubdivision,county:result.locality,lat:result.latitude,lon:result.longitude};
+      setLocation(locationData)
+
+    }catch(err){
+      console.error(err);
+    }
+
+  }
+
   const requestLocationData = async()=>{
     setRequestError(undefined);
     const uri:string = `https://api.zippopotam.us/us/${zipcode}`;
@@ -68,6 +92,7 @@ function App() {
     }catch (err:any){
       if(err.name === 'AbortError') return;
       setRequestError('Bad zipcode');
+      console.warn(`zipcode: ${zipcode}`);
       console.error(err.message);
       setLocation(undefined);
       setCurrentWeather(undefined);
@@ -75,7 +100,10 @@ function App() {
     }    
   }
 
-  const retrieveForecast = async(uri:string,controller:AbortController)=>{
+  const retrieveForecast = async()=>{
+    if(!location) return;
+    const controller:AbortController = new AbortController();  
+      const uri:string = `https://api.open-meteo.com/v1/forecast?latitude=${location.lat}&longitude=${location.lon}&current=temperature_2m,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,weather_code,wind_speed_10m_max,sunrise,sunset&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=auto&hourly=temperature_2m,weather_code,wind_speed_10m&forecast_hours=12`; 
       try{
         const response = await fetch(uri,{signal:controller.signal});
         if(!response.ok){
@@ -173,7 +201,7 @@ function App() {
         {lastUpdated && <>
           <div style={{display:"flex",flexDirection:"row",alignItems:'center'}}>
           <p>Last Updated: {lastUpdated}</p>
-          <button onClick={()=>requestLocationData()} style={{height:"50%"}}>↻</button>
+          <button onClick={()=>retrieveForecast()} style={{height:"50%"}}>↻</button>
           </div>
         </>} 
       </main>      
