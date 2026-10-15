@@ -1,10 +1,9 @@
-import { useState,useEffect,useRef } from 'react'
-import type {Location,Weather,News} from './Types.ts'
-import {WeatherCard} from '../Components/weatherCard'
-import {WeeklyWeather} from '../Components/WeeklyWeather'
-import {HourlyWeather} from '../Components/HourlyWeather'
-
-
+import { useState,useEffect,useRef } from 'react';
+import type {Location,Weather,News} from './Types.ts';
+import {WeatherCard} from '../Components/weatherCard';
+import {NewsCard} from '../Components/NewsCard';
+import {WeeklyWeather} from '../Components/WeeklyWeather';
+import {HourlyWeather} from '../Components/HourlyWeather';
 
 function App() {
   const [zipcode,setZipcode] = useState<string>("");
@@ -221,7 +220,7 @@ function App() {
     <div className="shell">
       <aside className="sidebar">Weather</aside>
       <main className="panel">        
-        <div style={{display:"flex",width:"100%", marginLeft:'10px'}}>
+        <div style={{display:"flex",width:"95%", marginLeft:'12px'}}>
           <h1>WEATHERMAN</h1>
           <div style={{marginLeft:'auto',display:"flex", alignItems:'center', gap:5}}>
             <p>Zipcode</p>  
@@ -236,6 +235,16 @@ function App() {
         </div> 
         {location && <HourlyWeather hourlyWeather={hourlyWeather}/>}
         {location && <WeeklyWeather dailyWeather={dailyWeather}/>}
+        <div style={{display:"flex",flexDirection:"column",alignItems:'center'}}>
+          <h1 >Local News</h1>          
+          <div style={{display:"flex",flexDirection:"row",flexWrap:"nowrap",gap:12,overflowX:"auto",width:"95%",justifyContent:"space-evenly",padding:"12px 12px"}}>
+            {newsData && newsData.map((entry)=>{
+              return <>
+                <NewsCard key={entry.id} news={entry}/>
+              </>
+            })}
+          </div>          
+        </div> 
         {lastUpdated && <>
           <div style={{display:"flex",flexDirection:"row",alignItems:'center'}}>
           <p>Last Updated: {lastUpdated}</p>
@@ -246,16 +255,6 @@ function App() {
             retrieveLocalNews(weatherController.current);}} style={{height:"50%"}}>↻</button>
           </div>
         </>}
-        <div style={{display:"flex",flexDirection:"column",alignItems:'center'}}>
-          <h1 >Local News</h1>
-          <div style={{display:"flex",flexDirection:"row",flexWrap:"nowrap",gap:12,overflowX:"auto",width:"100%",justifyContent:"space-evenly",padding:"12px 0"}}>
-            {newsData && newsData.map((entry)=>{
-              return <>
-                <p key={entry.id}>{entry.title}</p>
-              </>
-            })}
-          </div>
-        </div> 
       </main>      
     </div>    
   )
