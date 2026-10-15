@@ -15,3 +15,11 @@ export type Weather = {
   sunrise:string,
   sunset:string
 }
+export type News = {
+  id:string,
+  url:string,
+  title:string,
+  description:string,
+  publishedTime:string,
+  image:string,
+}
