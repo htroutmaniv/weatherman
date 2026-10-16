@@ -1,30 +1,10 @@
 import type {Weather} from '../src/Types'
 import {WEATHER_LABELS} from '../src/Labels'
 import {WeatherIcon} from './WeatherIcon'
+import {hourMin, dayLabel} from '../src/TimeUtilities'
 
 
-export function WeatherCard({weather,hideSunCycle=false,}:{weather:Weather;hideSunCycle?:boolean}) { 
-
-    const hourMin = (time:string)=>{
-        return new Date(time).toLocaleTimeString(undefined, {hour:'numeric',minute:'2-digit'});
-    }
-
-    const dayLabel = (time:string,type:string)=>{
-        switch(type){
-            case "current":
-                return "Current";
-            case "daily":
-                const day = new Date(`${time}T00:00:00`).toLocaleDateString(undefined, {weekday:'long'})
-                return day;
-            case "hourly":
-                const hour = hourMin(time);
-                return hour;
-            default:
-                return "Invalid Time Type";
-        }        
-    }  
-
-   
+export function WeatherCard({weather,hideSunCycle=false,}:{weather:Weather;hideSunCycle?:boolean}) {   
  
   return (
         <div style={{
@@ -46,8 +26,8 @@ export function WeatherCard({weather,hideSunCycle=false,}:{weather:Weather;hideS
                 <h1 style={{margin:0}}>{dayLabel(weather.time,weather.timeType)}</h1>
                 <WeatherIcon weather={weather}/>
                 {weather.temperature && <p>Temperature: {weather.temperature}F</p>}
-                {weather.highTemp && <p>High: {weather.highTemp}</p>}
-                {weather.lowTemp && <p>High: {weather.lowTemp}</p>}
+                {weather.highTemp && <p  style={{margin:5}}>High: {weather.highTemp}</p>}
+                {weather.lowTemp && <p  style={{margin:5}}>Low: {weather.lowTemp}</p>}
                 <p style={{ margin: 1 }}>Conditions: {WEATHER_LABELS[weather.code]}</p>
                 <p style={{ margin: 1 }}>Wind speed: {weather.windSpeed} MPH</p>
                 {!hideSunCycle && <p style={{ margin: 1 }}>Sunrise: {hourMin(weather.sunrise)}</p>}

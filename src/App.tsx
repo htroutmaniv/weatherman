@@ -79,8 +79,7 @@ function App() {
 
   }
 
-  const requestLocationData = async(zip:string)=>{
-    if(zipcode) zip = zipcode;
+  const requestLocationData = async(zip:string)=>{    
     setRequestError(undefined);
     const uri:string = `https://api.zippopotam.us/us/${zip}`;
     if(abortRef.current) abortRef.current.abort();
@@ -192,8 +191,6 @@ function App() {
           throw new Error(response);
         }
         const result = await response.json();
-        console.log(`NEWS for ${location.county}, ${location.state}`);
-        console.log(result);
         const newsEntries:News[] = [];
         for(const data of result.results){
           const news = {
@@ -239,9 +236,8 @@ function App() {
           <h1 >Local News</h1>          
           <div style={{display:"flex",flexDirection:"row",flexWrap:"nowrap",gap:12,overflowX:"auto",width:"95%",justifyContent:"space-evenly",padding:"12px 12px"}}>
             {newsData && newsData.map((entry)=>{
-              return <>
-                <NewsCard key={entry.id} news={entry}/>
-              </>
+              return <NewsCard key={entry.id} news={entry}/>
+              
             })}
           </div>          
         </div> 

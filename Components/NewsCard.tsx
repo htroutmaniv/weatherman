@@ -1,4 +1,5 @@
 import type {News} from '../src/Types'
+import {dayHourMin} from '../src/TimeUtilities'
 export function NewsCard({news}:{news:News}){
     const { url, title, description, publishedTime, image} = news;
     return (
@@ -22,6 +23,7 @@ export function NewsCard({news}:{news:News}){
             </a>
             <h2>{title}</h2>
             <p>{description}</p>
+            <p>Published: {dayHourMin(publishedTime)}</p>
         </div>        
     )
 }

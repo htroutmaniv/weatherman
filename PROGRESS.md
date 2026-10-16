@@ -1,10 +1,10 @@
 # Weatherman — progress
 
-Last updated: **2026-10-15** (Thu — browser location seed)
+Last updated: **2026-10-16** (Fri — router deferred)
 
 ## Current focus
 
-**C11 — Browser location** in progress. On load, ask for geolocation and seed the ZIP field. **C10** news ticker after that. Deploy after the ticker.
+**C12 — Pages + sidebar** pushed to **Wed Oct 21**. React Router layout: `App` stays mounted, `Outlet` swaps weather and news. Before that, small polish only.
 
 ## Chunk status
 
@@ -19,9 +19,11 @@ Last updated: **2026-10-15** (Thu — browser location seed)
 | C5 | Normalize + display | pending | |
 | C6 | Location input | pending | |
 | C9 | Hourly forecast | done | `forecast_hours=12`, hour label, sunrise/sunset, night icons, refresh button calls the same forecast fetch |
-| C11 | Browser location | **in progress** | `getCurrentPosition` on mount. Reverse lat/lon to a US ZIP and `setZipcode`. Denied permission leaves the field empty. |
-| C10 | News ticker | pending | Headlines for the city; each item is a link that opens the article in a new tab |
-| C7 | Deploy | pending | After the ticker. Production build + public URL in the README |
+| C11 | Browser location | done | On mount, `getCurrentPosition` → BigDataCloud postcode → `requestLocationData(postcode)`. Zippopotam `place name` is the city. Denied permission leaves the field empty. |
+| C10 | News ticker | done | Free News API `q=place+state`. `NewsCard` row: image is the article link (`target=_blank`). Title and description on the card. |
+| C12 | Pages + shared ZIP toolbar | **Wed Oct 21** | React Router. Layout owns ZIP + location. `Outlet` swaps weather and news. Sidebar uses `NavLink`. |
+| C13 | Small polish | in progress | ZIP argument fix done. `TimeUtilities.ts` shared by both cards. News card shows published weekday + time. Still open: skip a missing image. |
+| C7 | Deploy | pending | After the pages. Production build + public URL in the README |
 
 ## Session log
 
@@ -45,6 +47,17 @@ Last updated: **2026-10-15** (Thu — browser location seed)
 ### 2026-10-14 Wed
 - C9 done: hourly row, sunrise/sunset on the daily fields, night icons between 9pm and 9am, refresh button via an `onRefresh` prop. `HourlyWeather` and `WeeklyWeather` are their own components. `WeeklyWeather` must not reference `location` unless it is passed in.
 
+### 2026-10-16 Fri
+- `requestLocationData` uses the zip argument. Browser passes the postcode string; the button passes state.
+- Date formatting lives in `src/TimeUtilities.ts`. Weather cards and news cards both import it. News shows published weekday and time.
+- **C12** router split is Wed Oct 21.
+
+### 2026-10-15 Thu
+- C11 done: browser geolocation seeds the ZIP. The postcode is passed into `requestLocationData` so the fetch does not read the stale `zipcode` state. Location and the news query both use Zippopotam's place name.
+- C10 done: local headlines in a horizontal `NewsCard` row. The image links to the article; the card body does not.
+- **Next session:** C12. Separate weather and news pages, sidebar navigation, shared ZIP toolbar.
+
+
 ## Blockers
 
 - None
@@ -53,4 +66,6 @@ Last updated: **2026-10-15** (Thu — browser location seed)
 
 - v1: US ZIP → Zippopotam.us → Open-Meteo. Temperature °F, wind mph. `timezone=auto` when adding daily/hourly so day labels are local.
 - Agent does not write project app code unless Harold asks
-- One feed in v1; 3D explicitly post-v1
+- Place name always comes from Zippopotam, including when the browser only supplied a postcode.
+- C12 (Wed Oct 21): declarative React Router. Layout route owns zip and location. `Outlet` renders the page. `useOutletContext` passes `location`.
+- News: Free News API, keyword query on place + state. 3D still post-v1.
