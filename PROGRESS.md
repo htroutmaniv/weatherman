@@ -1,10 +1,10 @@
 # Weatherman — progress
 
-Last updated: **2026-10-16** (Fri — router deferred)
+Last updated: **2026-10-28** (Wed — C12 done)
 
 ## Current focus
 
-**C12 — Pages + sidebar** pushed to **Wed Oct 21**. React Router layout: `App` stays mounted, `Outlet` swaps weather and news. Before that, small polish only.
+**C13 polish** (skip missing news image, small cleanup), then **C7 deploy**.
 
 ## Chunk status
 
@@ -21,7 +21,7 @@ Last updated: **2026-10-16** (Fri — router deferred)
 | C9 | Hourly forecast | done | `forecast_hours=12`, hour label, sunrise/sunset, night icons, refresh button calls the same forecast fetch |
 | C11 | Browser location | done | On mount, `getCurrentPosition` → BigDataCloud postcode → `requestLocationData(postcode)`. Zippopotam `place name` is the city. Denied permission leaves the field empty. |
 | C10 | News ticker | done | Free News API `q=place+state`. `NewsCard` row: image is the article link (`target=_blank`). Title and description on the card. |
-| C12 | Pages + shared ZIP toolbar | **Wed Oct 21** | React Router. Layout owns ZIP + location. `Outlet` swaps weather and news. Sidebar uses `NavLink`. |
+| C12 | Pages + shared ZIP toolbar | done | React Router. `App` layout + `ZipcodeHeader`. `WeatherPage` / `NewsPage` via `Outlet` + `useOutletContext`. Sidebar `NavLink`s. |
 | C13 | Small polish | in progress | ZIP argument fix done. `TimeUtilities.ts` shared by both cards. News card shows published weekday + time. Still open: skip a missing image. |
 | C7 | Deploy | pending | After the pages. Production build + public URL in the README |
 
@@ -47,10 +47,15 @@ Last updated: **2026-10-16** (Fri — router deferred)
 ### 2026-10-14 Wed
 - C9 done: hourly row, sunrise/sunset on the daily fields, night icons between 9pm and 9am, refresh button via an `onRefresh` prop. `HourlyWeather` and `WeeklyWeather` are their own components. `WeeklyWeather` must not reference `location` unless it is passed in.
 
+### 2026-10-28 Wed
+- **C12** done: `react-router`, nested routes, `ZipcodeHeader`, `WeatherPage` / `NewsPage`, outlet context, sidebar `NavLink`s.
+- Last-updated / refresh still on the layout (shows on both pages). Fine for now; can move onto weather-only later.
+- **Next:** C13 polish, then C7 deploy.
+
 ### 2026-10-16 Fri
 - `requestLocationData` uses the zip argument. Browser passes the postcode string; the button passes state.
 - Date formatting lives in `src/TimeUtilities.ts`. Weather cards and news cards both import it. News shows published weekday and time.
-- **C12** router split is Wed Oct 21.
+- **C12** router split deferred past True Anomaly HM.
 
 ### 2026-10-15 Thu
 - C11 done: browser geolocation seeds the ZIP. The postcode is passed into `requestLocationData` so the fetch does not read the stale `zipcode` state. Location and the news query both use Zippopotam's place name.

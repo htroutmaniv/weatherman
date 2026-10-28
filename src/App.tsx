@@ -1,9 +1,7 @@
 import { useState,useEffect,useRef } from 'react';
 import type {Location,Weather,News} from './Types.ts';
-import {WeatherCard} from '../Components/weatherCard';
-import {NewsCard} from '../Components/NewsCard';
-import {WeeklyWeather} from '../Components/WeeklyWeather';
-import {HourlyWeather} from '../Components/HourlyWeather';
+import {ZipcodeHeader} from '../Components/ZipcodeHeader';
+import {Outlet,NavLink} from 'react-router'
 
 function App() {
   const [zipcode,setZipcode] = useState<string>("");
@@ -215,32 +213,14 @@ function App() {
 
   return (
     <div className="shell">
-      <aside className="sidebar">Weather</aside>
+      <div  style={{width:"5%", display:"flex",flexDirection:"column",alignItems:'center'}}>
+        <NavLink to="/" style={{ color: 'white', textDecoration: 'none' }}>Weather</NavLink>
+        <NavLink to="/news" style={{ color: 'white', textDecoration: 'none' }}>News</NavLink>
+      </div>
       <main className="panel">        
-        <div style={{display:"flex",width:"95%", marginLeft:'12px'}}>
-          <h1>WEATHERMAN</h1>
-          <div style={{marginLeft:'auto',display:"flex", alignItems:'center', gap:5}}>
-            <p>Zipcode</p>  
-            <input value={zipcode} onChange={(e)=>setZipcode(e.target.value.replace(/\D/g,'').slice(0,5))} placeholder="enter zipcode" type="text" style={{height:"25%", position:"relative"}}></input>
-            <button onClick={()=>requestLocationData(zipcode)} style={{width:'150px',height:"35%", position:"relative"}} disabled={searchDisabled}>update</button>
-          </div>
-        </div> 
+        <ZipcodeHeader title ="Weatherman" zipcode={zipcode} searchDisabled={searchDisabled} setZipcode={setZipcode} requestLocationData={requestLocationData}/>
         {requestError&& <h1 style={{display:"flex",flexDirection:"column",alignItems:'center',color:"rgb(255, 0, 0)"}}>Error Retrieving data: {requestError}</h1>}
-        <div style={{display:"flex",flexDirection:"column",width:"100%",alignItems:'center'}}>
-          {location && <h2 >Current conditions in {location.county}, {location.state} </h2>}
-          {currentWeather && <WeatherCard weather={currentWeather}></WeatherCard>}
-        </div> 
-        {location && <HourlyWeather hourlyWeather={hourlyWeather}/>}
-        {location && <WeeklyWeather dailyWeather={dailyWeather}/>}
-        <div style={{display:"flex",flexDirection:"column",alignItems:'center'}}>
-          <h1 >Local News</h1>          
-          <div style={{display:"flex",flexDirection:"row",flexWrap:"nowrap",gap:12,overflowX:"auto",width:"95%",justifyContent:"space-evenly",padding:"12px 12px"}}>
-            {newsData && newsData.map((entry)=>{
-              return <NewsCard key={entry.id} news={entry}/>
-              
-            })}
-          </div>          
-        </div> 
+        <Outlet context ={{location,currentWeather,dailyWeather,hourlyWeather,newsData}}/>        
         {lastUpdated && <>
           <div style={{display:"flex",flexDirection:"row",alignItems:'center'}}>
           <p>Last Updated: {lastUpdated}</p>
